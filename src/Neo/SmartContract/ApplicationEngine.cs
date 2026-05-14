@@ -68,7 +68,7 @@ namespace Neo.SmartContract
         private static Dictionary<uint, InteropDescriptor>? services;
         // Total amount of GAS spent to execute.
         // In the unit of picoGAS, 1 picoGAS = 1e-12 GAS
-        private readonly BigInteger _feeAmount;
+        private BigInteger _feeAmount;
         private BigInteger _feeConsumed;
         // Decimals for fee calculation
         public const uint FeeFactor = 10000;
@@ -79,7 +79,7 @@ namespace Neo.SmartContract
         private readonly Dictionary<UInt160, int> invocationCounter = new();
         private readonly Dictionary<ExecutionContext, ContractTaskAwaiter> contractTasks = new();
         // In the unit of picoGAS, 1 picoGAS = 1e-12 GAS
-        private readonly BigInteger _execFeeFactor;
+        private BigInteger _execFeeFactor;
         // In the unit of datoshi, 1 datoshi = 1e-8 GAS
         internal readonly uint StoragePrice;
         private byte[] nonceData;
@@ -263,7 +263,7 @@ namespace Neo.SmartContract
                 // Initialize opcode price calculator: if Gorgon is not enabled, use static prices and
                 // charge the fee prior to instruction execution. If Gorgon is enabled, use dynamic prices
                 // and charge the fee after instruction execution.
-                if (settings == null || !settings.IsHardforkEnabled(Hardfork.HF_Gorgon, persistingIndex))
+                if (!(settings == null || !settings.IsHardforkEnabled(Hardfork.HF_Gorgon, persistingIndex)))
                     _preExecuteInstruction = instruction => AddFee(_execFeeFactor * OpCodePriceTable[(byte)instruction.OpCode]);
                 else
                     _postExecuteInstruction = (instruction, runStats) =>
@@ -1070,6 +1070,8 @@ namespace Neo.SmartContract
         {
             persistingBlock ??= CreateDummyBlock(snapshot, settings ?? ProtocolSettings.Default);
             ApplicationEngine engine = Create(TriggerType.Application, container, snapshot, persistingBlock, settings, gas, diagnostic);
+            engine._execFeeFactor = 30 * FeeFactor; // The execution fee factor for Run is higher than normal execution since it's more likely to be used in testing and debugging, and we want to encourage users to use Create instead of Run for normal execution.
+            engine._feeAmount = new BigInteger(30 * 20) * new BigInteger(10_000_000) * new BigInteger(FeeFactor) * new BigInteger(OpcodePriceMultiplier); // The maximum fee for Run is higher than normal execution since it's more likely to be used in testing and debugging, and we want to encourage users to use Create instead of Run for normal execution.
             engine.LoadScript(script, initialPosition: offset);
             engine.Execute();
             return engine;
