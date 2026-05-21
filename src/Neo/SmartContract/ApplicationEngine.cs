@@ -298,7 +298,7 @@ namespace Neo.SmartContract
         {
             var table = ComposeNotGorgonJumpTable();
 
-            table[OpCode.SUBSTR] = VulnerableSubStr;
+            //table[OpCode.SUBSTR] = VulnerableSubStr;
 
             return table;
         }
@@ -308,10 +308,10 @@ namespace Neo.SmartContract
             var table = ComposeDefaultJumpTable();
 
             // Before https://github.com/neo-project/neo-vm/pull/543
-            table[OpCode.HASKEY] = HasKey_Before543;
+            /* table[OpCode.HASKEY] = HasKey_Before543;
             table[OpCode.PICKITEM] = PickItem_Before543;
             table[OpCode.SETITEM] = SetItem_Before543;
-            table[OpCode.REMOVE] = Remove_Before543;
+            table[OpCode.REMOVE] = Remove_Before543; */
 
             // Before https://github.com/neo-project/neo-vm/pull/567.
             table[OpCode.SHR] = VulnerableSHR;
