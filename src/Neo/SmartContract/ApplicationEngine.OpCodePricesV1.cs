@@ -48,7 +48,7 @@ namespace Neo.SmartContract
         private static readonly long[] ReverseItemsBufW = { 9, 1690 };
         private static readonly long[] ReverseW = { 19, 1702 };
         private static readonly long[] RollW = { 5, 1910 };
-        private static readonly long[] SetitemW = { 99, 350, 2942 };
+        private static readonly long[] SetitemW = { 96, 149, 2390 };
         private static readonly long[] SizeW = { 100, 2693 };
         private static readonly long[] StW = { 98, 1599 };
         private static readonly long[] SubstrW = { 7, 2908 };
