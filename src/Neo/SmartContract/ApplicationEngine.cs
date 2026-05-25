@@ -263,15 +263,12 @@ namespace Neo.SmartContract
                 // Initialize opcode price calculator: if Gorgon is not enabled, use static prices and
                 // charge the fee prior to instruction execution. If Gorgon is enabled, use dynamic prices
                 // and charge the fee after instruction execution.
-                if (!(settings == null || !settings.IsHardforkEnabled(Hardfork.HF_Gorgon, persistingIndex)))
-                    _preExecuteInstruction = instruction => AddFee(_execFeeFactor * OpCodePriceTable[(byte)instruction.OpCode]);
-                else
-                    _postExecuteInstruction = (instruction, runStats) =>
-                    {
-                        var stats = runStats ?? new RunStats();
-                        long price = OpcodeV1((long)_execFeeFactor, instruction.OpCode, stats);
-                        AddFemtoGas(price);
-                    };
+                _postExecuteInstruction = (instruction, runStats) =>
+                {
+                    var stats = runStats ?? new RunStats();
+                    long price = OpcodeV1((long)_execFeeFactor, instruction.OpCode, stats);
+                    AddFemtoGas(price);
+                };
             }
 
             if (persistingBlock is not null)
@@ -1070,8 +1067,6 @@ namespace Neo.SmartContract
         {
             persistingBlock ??= CreateDummyBlock(snapshot, settings ?? ProtocolSettings.Default);
             ApplicationEngine engine = Create(TriggerType.Application, container, snapshot, persistingBlock, settings, gas, diagnostic);
-            engine._execFeeFactor = 30 * FeeFactor; // The execution fee factor for Run is higher than normal execution since it's more likely to be used in testing and debugging, and we want to encourage users to use Create instead of Run for normal execution.
-            engine._feeAmount = new BigInteger(30 * 20) * new BigInteger(10_000_000) * new BigInteger(FeeFactor) * new BigInteger(OpcodePriceMultiplier); // The maximum fee for Run is higher than normal execution since it's more likely to be used in testing and debugging, and we want to encourage users to use Create instead of Run for normal execution.
             engine.LoadScript(script, initialPosition: offset);
             engine.Execute();
             return engine;
