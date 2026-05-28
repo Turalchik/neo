@@ -543,7 +543,7 @@ namespace Neo.SmartContract
             }
 
             _feeConsumed = _feeConsumed + femtoGas;
-            if (_feeConsumed > _feeAmount)
+            if (_feeAmount > 0 && _feeConsumed > _feeAmount)
                 throw new InvalidOperationException("Insufficient GAS.");
         }
 
