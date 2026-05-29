@@ -413,7 +413,7 @@ namespace Neo.Ledger
             {
                 var allApplicationExecuted = new List<ApplicationExecuted>();
                 TransactionState[] transactionStates;
-                using (var engine = ApplicationEngine.Create(TriggerType.OnPersist, null, snapshot, block, _system.Settings, 0))
+                using (var engine = ApplicationEngine.Create(TriggerType.OnPersist, null, snapshot, block, _system.Settings, -1))
                 {
                     engine.LoadScript(s_onPersistScript);
                     if (engine.Execute() != VMState.HALT)
@@ -452,7 +452,7 @@ namespace Neo.Ledger
                     allApplicationExecuted.Add(applicationExecuted);
                 }
 
-                using (var engine = ApplicationEngine.Create(TriggerType.PostPersist, null, snapshot, block, _system.Settings, 0))
+                using (var engine = ApplicationEngine.Create(TriggerType.PostPersist, null, snapshot, block, _system.Settings, -1))
                 {
                     engine.LoadScript(s_postPersistScript);
                     if (engine.Execute() != VMState.HALT)
