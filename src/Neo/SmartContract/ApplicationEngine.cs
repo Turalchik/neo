@@ -1001,6 +1001,11 @@ namespace Neo.SmartContract
             _postExecuteInstruction?.Invoke(instruction, priceArgs);
         }
 
+        protected override string TakeAdditionalOpcodeInformation()
+        {
+            return _feeConsumed.ToString();
+        }
+
         private static Block CreateDummyBlock(IReadOnlyStore snapshot, ProtocolSettings settings)
         {
             UInt256 hash = NativeContract.Ledger.CurrentHash(snapshot);
