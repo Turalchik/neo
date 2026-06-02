@@ -327,10 +327,20 @@ namespace Neo.SmartContract
                     var index = (int)key.GetInteger();
                     if (index < 0 || index >= array.Count)
                         throw new InvalidOperationException($"The index of {nameof(VMArray)} is out of range, {index}/[0, {array.Count}).");
+                    var i = (int)index;
+                    var item = array[i];
                     array.RemoveAt(index);
+
+                    if (array.IsStackReferenced)
+                        engine.ReferenceCounter.RemoveStackReference(item);
                     break;
                 case Map map:
-                    map.Remove(key, out _);
+                    var old = map.Remove(key, out _);
+                    if (old is not null && map.IsStackReferenced)
+                    {
+                        engine.ReferenceCounter.RemoveStackReference(key);
+                        engine.ReferenceCounter.RemoveStackReference(old);
+                    }
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid type for {instruction.OpCode}: {x.Type}");
@@ -351,11 +361,28 @@ namespace Neo.SmartContract
                         var index = (int)key.GetInteger();
                         if (index < 0 || index >= array.Count)
                             throw new CatchableException($"The index of {nameof(VMArray)} is out of range, {index}/[0, {array.Count}).");
+                        if (array.IsStackReferenced)
+                        {
+                            engine.ReferenceCounter.RemoveStackReference(array[index]);
+                            engine.ReferenceCounter.AddStackReference(value);
+                        }
                         array[index] = value;
                         break;
                     }
                 case Map map:
                     {
+                        if (map.IsStackReferenced)
+                        {
+                            if (!map.TryGetValue(key, out var value1))
+                            {
+                                engine.ReferenceCounter.AddStackReference(key);
+                            }
+                            else
+                            {
+                                engine.ReferenceCounter.RemoveStackReference(value1);
+                            }
+                            engine.ReferenceCounter.AddStackReference(value);
+                        }
                         map[key] = value;
                         break;
                     }
@@ -885,11 +912,11 @@ namespace Neo.SmartContract
                 string s => s,
                 BigInteger i => i,
                 JObject o => o.ToByteArray(false),
-                IInteroperable interoperable => interoperable.ToStackItem(ReferenceCounter),
+                IInteroperable interoperable => interoperable.ToStackItem(),
                 ISerializable i => i.ToArray(),
                 StackItem item => item,
-                (object a, object b) => new Struct(ReferenceCounter) { Convert(a), Convert(b) },
-                Array array => new VMArray(ReferenceCounter, array.OfType<object>().Select(p => Convert(p))),
+                (object a, object b) => new Struct() { Convert(a), Convert(b) },
+                Array array => new VMArray(array.OfType<object>().Select(p => Convert(p))),
                 _ => StackItem.FromInterface(value)
             };
         }
