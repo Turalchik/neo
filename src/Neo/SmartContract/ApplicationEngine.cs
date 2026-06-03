@@ -92,6 +92,8 @@ namespace Neo.SmartContract
         /// </summary>
         private readonly Action<Instruction?, RunStats?>? _postExecuteInstruction;
 
+        private RunStats myRunStats = new();
+
         /// <summary>
         /// Gets or sets the provider used to create the <see cref="ApplicationEngine"/>.
         /// </summary>
@@ -266,6 +268,7 @@ namespace Neo.SmartContract
                 _postExecuteInstruction = (instruction, runStats) =>
                 {
                     var stats = runStats ?? new RunStats();
+                    myRunStats = stats;
                     long price = instruction is null ? 0 : OpcodeV1((long)_execFeeFactor, instruction.OpCode, stats);
                     AddFemtoGas(price);
                 };
@@ -1030,7 +1033,7 @@ namespace Neo.SmartContract
 
         protected override string TakeAdditionalOpcodeInformation()
         {
-            return _feeConsumed.ToString();
+            return _feeConsumed.ToString() + " " + myRunStats.ToString();
         }
 
         private static Block CreateDummyBlock(IReadOnlyStore snapshot, ProtocolSettings settings)
