@@ -364,12 +364,9 @@ namespace Neo.SmartContract
                         var index = (int)key.GetInteger();
                         if (index < 0 || index >= array.Count)
                             throw new CatchableException($"The index of {nameof(VMArray)} is out of range, {index}/[0, {array.Count}).");
-                        if (array.IsStackReferenced)
-                        {
-                            engine.ReferenceCounter.RemoveStackReference(array[index]);
-                            engine.ReferenceCounter.AddStackReference(value);
-                        }
                         array[index] = value;
+                        if (array.IsStackReferenced)
+                            engine.ReferenceCounter.AddStackReference(value);
                         break;
                     }
                 case Map map:
