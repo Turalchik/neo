@@ -125,6 +125,7 @@ namespace Neo.Ledger
         public Blockchain(NeoSystem system)
         {
             _system = system;
+            System.IO.Directory.CreateDirectory("./Logs_RC");
             _rcLog = new System.IO.StreamWriter($"./Logs_RC/rc_{system.Settings.Network}.txt", true);
         }
 
