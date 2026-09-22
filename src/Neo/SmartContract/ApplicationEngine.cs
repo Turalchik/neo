@@ -280,15 +280,15 @@ namespace Neo.SmartContract
                 StoragePrice = NativeContract.Policy.GetStoragePrice(snapshotCache);
             }
 
-            if (settings == null || !settings.IsHardforkEnabled(Hardfork.HF_Huyao, persistingIndex))
+            /* if (settings == null || !settings.IsHardforkEnabled(Hardfork.HF_Huyao, persistingIndex))
                 _preExecuteInstruction = instruction => AddFee(_execFeeFactor * OpCodePriceTable[(byte)instruction.OpCode], false);
-            else
-                _postExecuteInstruction = (instruction, runStats) =>
-                {
-                    var stats = runStats ?? new RunStats();
-                    long price = instruction is null ? 0 : OpcodeV1((long)_execFeeFactor, instruction.OpCode, stats);
-                    AddFemtoGas(price, false);
-                };
+            else */
+            _postExecuteInstruction = (instruction, runStats) =>
+            {
+                var stats = runStats ?? new RunStats();
+                long price = instruction is null ? 0 : OpcodeV1((long)_execFeeFactor, instruction.OpCode, stats);
+                AddFemtoGas(price, false);
+            };
 
             if (persistingBlock is not null)
             {
